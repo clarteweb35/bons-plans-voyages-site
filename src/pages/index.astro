@@ -1,0 +1,43 @@
+---
+import { getCollection } from "astro:content";
+
+const bonsPlans = (await getCollection("bons-plans")).sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
+);
+---
+
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bons plans voyages</title>
+  </head>
+  <body>
+    <header>
+      <h1>Bons plans voyages</h1>
+      <p>Vols, séjours et ventes flash repérés pour vous.</p>
+    </header>
+
+    <main>
+      {
+        bonsPlans.length === 0 ? (
+          <p>Aucun bon plan pour le moment, revenez bientôt !</p>
+        ) : (
+          <ul>
+            {bonsPlans.map((offre) => (
+              <li>
+                <a href={`/bons-plans/${offre.id}/`}>
+                  <h2>{offre.data.title}</h2>
+                  <p>{offre.data.description}</p>
+                  <small>
+                    Publié le {offre.data.date.toLocaleDateString("fr-FR")}
+                  </small>
+                </a>
+              </li>
+            ))}
+          </ul>
+        )
+      }
+    </main>
+  </body>
+</html>
