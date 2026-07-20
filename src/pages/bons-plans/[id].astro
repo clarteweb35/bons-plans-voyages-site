@@ -1,0 +1,30 @@
+---
+import { getCollection, render } from "astro:content";
+
+export async function getStaticPaths() {
+  const bonsPlans = await getCollection("bons-plans");
+  return bonsPlans.map((offre) => ({
+    params: { id: offre.id },
+    props: { offre },
+  }));
+}
+
+const { offre } = Astro.props;
+const { Content } = await render(offre);
+---
+
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{offre.data.title}</title>
+    <meta name="description" content={offre.data.description} />
+  </head>
+  <body>
+    <a href="/">&larr; Retour aux bons plans</a>
+
+    <article>
+      <Content />
+    </article>
+  </body>
+</html>
