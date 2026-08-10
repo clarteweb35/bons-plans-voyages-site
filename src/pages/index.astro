@@ -4,40 +4,416 @@ import { getCollection } from "astro:content";
 const bonsPlans = (await getCollection("bons-plans")).sort(
   (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
 );
+
+const pourTableau = bonsPlans.slice(0, 5);
+
+const topDeals = bonsPlans
+  .filter((o) => (o.data.reduction ?? 0) >= 20 && o.data.confidence !== "FAIBLE")
+  .sort((a, b) => (b.data.reduction ?? 0) - (a.data.reduction ?? 0))
+  .slice(0, 3);
+
+// City-breaks : séjours courts (weekend), durée de 4 jours maximum.
+// Calculé directement depuis le champ duree existant, pas de nouvelle
+// donnée à générer.
+const cityBreaks = bonsPlans
+  .filter((o) => typeof o.data.duree === "number" && o.data.duree <= 4)
+  .slice(0, 6);
+
+// Ventes flash / dernière minute : combine grosse réduction (>=30%) ET
+// repérage récent (offre publiée dans les 5 derniers jours), comme proxy
+// d'urgence en attendant une vraie date de départ structurée venant du
+// flux Awin (à ajouter plus tard dans collect-and-normalize.js).
+const CINQ_JOURS_MS = 5 * 24 * 60 * 60 * 1000;
+const maintenant = Date.now();
+const ventesFlash = bonsPlans
+  .filter(
+    (o) =>
+      (o.data.reduction ?? 0) >= 30 &&
+      o.data.confidence !== "FAIBLE" &&
+      maintenant - o.data.date.valueOf() <= CINQ_JOURS_MS
+  )
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .slice(0, 4);
+
+function extraireDestination(offre: (typeof bonsPlans)[number]) {
+  if (offre.data.destination) return offre.data.destination;
+  const match = offre.data.title.match(/(?:à|au|en)\s+([A-ZÀ-Ý][\wÀ-ÿ\- ]{2,30}?)(?:\s+dès|\s*:|$)/i);
+  return match ? match[1].trim() : offre.data.title.slice(0, 22);
+}
+
+function extrairePrix(offre: (typeof bonsPlans)[number]) {
+  if (offre.data.prix) return `${offre.data.prix}€`;
+  const match = offre.data.title.match(/(\d+\s?€)/);
+  return match ? match[1] : "—";
+}
+
+// Valeur numérique du prix, utilisée pour le filtre budget.
+// Retombe sur un parsing du titre si le champ structuré est absent.
+function prixNumerique(offre: (typeof bonsPlans)[number]) {
+  if (typeof offre.data.prix === "number") return offre.data.prix;
+  const match = offre.data.title.match(/(\d+)\s?€/);
+  return match ? parseInt(match[1], 10) : null;
+}
+
+const badgeConfiance: Record<string, { label: string; classe: string }> = {
+  ELEVE: { label: "Bon plan confirmé", classe: "badge--eleve" },
+  MOYEN: { label: "Offre repérée", classe: "badge--moyen" },
+  FAIBLE: { label: "À vérifier", classe: "badge--faible" },
+};
+
+// Villes de départ disponibles, déduites des offres elles-mêmes
+// (pas de liste codée en dur, s'adapte automatiquement aux données).
+const villesDisponibles = Array.from(
+  new Set(bonsPlans.map((o) => o.data.villeDepart).filter((v): v is string => Boolean(v)))
+).sort();
+
+const tranchesBudget = [
+  { value: "0-100", label: "– 100€" },
+  { value: "100-200", label: "100 – 200€" },
+  { value: "200-500", label: "200 – 500€" },
+  { value: "500-999999", label: "500€ +" },
+];
 ---
 
 <html lang="fr">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Bons plans voyages</title>
+    <title>Voyage Malin — Bons plans weekend au départ de Rennes &amp; Nantes</title>
+    <meta
+      name="description"
+      content="Bons plans voyage weekend, moins de 200€, au départ de Rennes et Nantes. Repérés et vérifiés chaque jour."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&family=Public+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/styles/global.css" />
   </head>
   <body>
-    <header>
-      <h1>Bons plans voyages</h1>
-      <p>Vols, séjours et ventes flash repérés pour vous.</p>
+    <header class="site-header">
+      <a class="brand" href="/">Voyage Malin</a>
+      <span class="tagline">Départs Rennes · Nantes</span>
+      <nav class="site-nav">
+        <a href="/guides/">Astuces &amp; Hacks Voyage</a>
+      </nav>
     </header>
+
+    <section class="departure-board" aria-label="Tableau des prochains départs">
+      <p class="departure-board__label">Tableau des départs — weekend, moins de 200€</p>
+      {
+        pourTableau.length === 0 ? (
+          <p style="font-family: var(--font-mono); opacity: 0.7; margin: 0.5rem 0.2rem;">
+            Aucun départ affiché pour le moment.
+          </p>
+        ) : (
+          pourTableau.map((offre) => (
+            <div class="departure-row">
+              <span class="departure-row__from">{offre.data.villeDepart ?? "RNS/NTE"}</span>
+              <span class="departure-row__dest flap">{extraireDestination(offre)}</span>
+              <span class="departure-row__duree flap">
+                {offre.data.duree ? `${offre.data.duree}j` : "weekend"}
+              </span>
+              <span class="departure-row__prix flap">{extrairePrix(offre)}</span>
+            </div>
+          ))
+        )
+      }
+    </section>
 
     <main>
       {
-        bonsPlans.length === 0 ? (
-          <p>Aucun bon plan pour le moment, revenez bientôt !</p>
-        ) : (
-          <ul>
-            {bonsPlans.map((offre) => (
-              <li>
-                <a href={`/bons-plans/${offre.id}/`}>
-                  <h2>{offre.data.title}</h2>
-                  <p>{offre.data.description}</p>
-                  <small>
-                    Publié le {offre.data.date.toLocaleDateString("fr-FR")}
-                  </small>
-                </a>
-              </li>
-            ))}
-          </ul>
+        ventesFlash.length > 0 && (
+          <section class="flash-section" aria-label="Ventes flash">
+            <p class="flash-section__label">⚡ Ventes flash — dernière minute</p>
+            <ul class="flash-grid">
+              {ventesFlash.map((offre) => (
+                <li>
+                  <a class="deal-card deal-card--flash" href={`/bons-plans/${offre.id}/`}>
+                    <div class="deal-card__media">
+                      {offre.data.image ? (
+                        <img src={offre.data.image} alt={offre.data.destination ?? offre.data.title} loading="lazy" />
+                      ) : (
+                        <div class="deal-card__media-fallback">{extraireDestination(offre)}</div>
+                      )}
+                      <div class="deal-card__badges">
+                        <span class="badge badge--flash">⚡ Flash</span>
+                        {offre.data.reduction && <span class="badge badge--reduction">-{offre.data.reduction}%</span>}
+                      </div>
+                    </div>
+                    <div class="deal-card__body">
+                      <span class="deal-card__meta-top">{offre.data.voyagiste ?? "Bon plan voyage"}</span>
+                      <h2 class="deal-card__title">{offre.data.title}</h2>
+                      <div class="deal-card__price-row">
+                        {offre.data.prixInitial && <span class="deal-card__price-old">{offre.data.prixInitial}€</span>}
+                        <span class="deal-card__price-new">{extrairePrix(offre)}</span>
+                      </div>
+                      <span class="deal-card__cta">Voir le bon plan →</span>
+                    </div>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )
+      }
+
+      {
+        topDeals.length > 0 && (
+          <section class="top-deals-section" aria-label="Top deals du jour">
+            <p class="top-deals-section__label">🔥 Top deals du jour</p>
+            <ul class="top-deals-grid">
+              {topDeals.map((offre) => (
+                <li>
+                  <a class="deal-card deal-card--top" href={`/bons-plans/${offre.id}/`}>
+                    <div class="deal-card__media">
+                      {offre.data.image ? (
+                        <img src={offre.data.image} alt={offre.data.destination ?? offre.data.title} loading="lazy" />
+                      ) : (
+                        <div class="deal-card__media-fallback">{extraireDestination(offre)}</div>
+                      )}
+                      <div class="deal-card__badges">
+                        <span class="badge badge--top">Top deal</span>
+                        {offre.data.reduction && <span class="badge badge--reduction">-{offre.data.reduction}%</span>}
+                      </div>
+                    </div>
+                    <div class="deal-card__body">
+                      <span class="deal-card__meta-top">{offre.data.voyagiste ?? "Bon plan voyage"}</span>
+                      <h2 class="deal-card__title">{offre.data.title}</h2>
+                      <div class="deal-card__price-row">
+                        {offre.data.prixInitial && <span class="deal-card__price-old">{offre.data.prixInitial}€</span>}
+                        <span class="deal-card__price-new">{extrairePrix(offre)}</span>
+                      </div>
+                      <span class="deal-card__cta">Voir le bon plan →</span>
+                    </div>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )
+      }
+
+      {
+        cityBreaks.length > 0 && (
+          <section class="city-breaks-section" aria-label="City-breaks">
+            <p class="city-breaks-section__label">🏙️ City-breaks — weekend court</p>
+            <ul class="city-breaks-grid">
+              {cityBreaks.map((offre) => (
+                <li>
+                  <a class="deal-card deal-card--city" href={`/bons-plans/${offre.id}/`}>
+                    <div class="deal-card__media">
+                      {offre.data.image ? (
+                        <img src={offre.data.image} alt={offre.data.destination ?? offre.data.title} loading="lazy" />
+                      ) : (
+                        <div class="deal-card__media-fallback">{extraireDestination(offre)}</div>
+                      )}
+                      <div class="deal-card__badges">
+                        <span class="badge badge--city">{offre.data.duree}j</span>
+                        {offre.data.reduction && offre.data.reduction >= 10 && (
+                          <span class="badge badge--reduction">-{offre.data.reduction}%</span>
+                        )}
+                      </div>
+                    </div>
+                    <div class="deal-card__body">
+                      <span class="deal-card__meta-top">{offre.data.voyagiste ?? "Bon plan voyage"}</span>
+                      <h2 class="deal-card__title">{offre.data.title}</h2>
+                      <div class="deal-card__meta">
+                        {offre.data.villeDepart && <span>Départ {offre.data.villeDepart}</span>}
+                      </div>
+                      <div class="deal-card__price-row">
+                        {offre.data.prixInitial && <span class="deal-card__price-old">{offre.data.prixInitial}€</span>}
+                        <span class="deal-card__price-new">{extrairePrix(offre)}</span>
+                      </div>
+                      <span class="deal-card__cta">Voir le bon plan →</span>
+                    </div>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )
+      }
+
+      {(topDeals.length > 0 || cityBreaks.length > 0 || ventesFlash.length > 0) && (
+        <p class="section-divider">Tous les bons plans</p>
+      )}
+
+      {
+        bonsPlans.length > 0 && (
+          <section class="filters" aria-label="Filtrer les bons plans">
+            <div class="filters__group">
+              <span class="filters__label">Budget</span>
+              <div class="filters__options" data-filter="budget">
+                <button type="button" class="filter-pill is-active" data-value="all">
+                  Tous
+                </button>
+                {tranchesBudget.map((tranche) => (
+                  <button type="button" class="filter-pill" data-value={tranche.value}>
+                    {tranche.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            {villesDisponibles.length > 0 && (
+              <div class="filters__group">
+                <span class="filters__label">Départ</span>
+                <div class="filters__options" data-filter="ville">
+                  <button type="button" class="filter-pill is-active" data-value="all">
+                    Toutes
+                  </button>
+                  {villesDisponibles.map((ville) => (
+                    <button type="button" class="filter-pill" data-value={ville}>
+                      {ville}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </section>
+        )
+      }
+
+      <ul class="deals">
+        {
+          bonsPlans.length === 0 ? (
+            <li class="empty-state">
+              Aucun bon plan en attente d'embarquement pour l'instant. Revenez bientôt.
+            </li>
+          ) : (
+            bonsPlans.map((offre) => {
+              const confiance = badgeConfiance[offre.data.confidence] ?? badgeConfiance.MOYEN;
+              const prix = prixNumerique(offre);
+              return (
+                <li data-card="true" data-prix={prix ?? ""} data-ville={offre.data.villeDepart ?? ""}>
+                  <a class="deal-card" href={`/bons-plans/${offre.id}/`}>
+                    <div class="deal-card__media">
+                      {offre.data.image ? (
+                        <img src={offre.data.image} alt={offre.data.destination ?? offre.data.title} loading="lazy" />
+                      ) : (
+                        <div class="deal-card__media-fallback">
+                          {extraireDestination(offre)}
+                        </div>
+                      )}
+                      <div class="deal-card__badges">
+                        <span class={`badge ${confiance.classe}`}>{confiance.label}</span>
+                        {offre.data.reduction && offre.data.reduction >= 10 && (
+                          <span class="badge badge--reduction">-{offre.data.reduction}%</span>
+                        )}
+                      </div>
+                    </div>
+                    <div class="deal-card__body">
+                      <span class="deal-card__meta-top">
+                        {offre.data.voyagiste ?? "Bon plan voyage"}
+                      </span>
+                      <h2 class="deal-card__title">{offre.data.title}</h2>
+                      <div class="deal-card__meta">
+                        {offre.data.duree && <span>{offre.data.duree} jours</span>}
+                        {offre.data.villeDepart && <span>Départ {offre.data.villeDepart}</span>}
+                      </div>
+                      <div class="deal-card__price-row">
+                        {offre.data.prixInitial && (
+                          <span class="deal-card__price-old">{offre.data.prixInitial}€</span>
+                        )}
+                        <span class="deal-card__price-new">{extrairePrix(offre)}</span>
+                      </div>
+                      <span class="deal-card__cta">Voir le bon plan →</span>
+                    </div>
+                  </a>
+                </li>
+              );
+            })
+          )
+        }
+      </ul>
+
+      {
+        bonsPlans.length > 0 && (
+          <p class="empty-state filters-empty" data-filters-empty style="display: none;">
+            Aucun bon plan ne correspond à ces filtres pour le moment. Essayez d'élargir votre recherche.
+          </p>
         )
       }
     </main>
+
+    <script>
+      const CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789€";
+
+      function flip(el: Element) {
+        const final = el.textContent || "";
+        let frame = 0;
+        const totalFrames = 6;
+        const interval = setInterval(() => {
+          frame++;
+          el.classList.add("is-flipping");
+          if (frame < totalFrames) {
+            el.textContent = final
+              .split("")
+              .map((c) => (c === " " ? " " : CHARS[Math.floor(Math.random() * CHARS.length)]))
+              .join("");
+          } else {
+            el.textContent = final;
+            clearInterval(interval);
+          }
+        }, 40);
+      }
+
+      const rows = document.querySelectorAll<HTMLElement>(".departure-row");
+      rows.forEach((row, i) => {
+        const flaps = row.querySelectorAll(".flap");
+        flaps.forEach((flap) => {
+          setTimeout(() => flip(flap), i * 220);
+        });
+      });
+
+      // ------------------------------------------------------------
+      // Filtres budget / ville de départ (client-side, sans rechargement)
+      // ------------------------------------------------------------
+      const cards = Array.from(document.querySelectorAll<HTMLElement>(".deals li[data-card]"));
+      const emptyMessage = document.querySelector<HTMLElement>("[data-filters-empty]");
+
+      let activeBudget = "all";
+      let activeVille = "all";
+
+      function applyFilters() {
+        let visibleCount = 0;
+        cards.forEach((li) => {
+          const prixAttr = li.dataset.prix;
+          const prix = prixAttr ? Number(prixAttr) : null;
+          const ville = li.dataset.ville || "";
+
+          let matchBudget = true;
+          if (activeBudget !== "all") {
+            const [min, max] = activeBudget.split("-").map(Number);
+            matchBudget = prix !== null && prix >= min && prix <= max;
+          }
+
+          const matchVille = activeVille === "all" || ville === activeVille;
+          const visible = matchBudget && matchVille;
+
+          li.classList.toggle("is-hidden", !visible);
+          if (visible) visibleCount++;
+        });
+
+        if (emptyMessage) {
+          emptyMessage.style.display = visibleCount === 0 ? "block" : "none";
+        }
+      }
+
+      document.querySelectorAll<HTMLElement>(".filters__options").forEach((group) => {
+        const filterType = group.dataset.filter;
+        group.querySelectorAll<HTMLButtonElement>(".filter-pill").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            group.querySelectorAll(".filter-pill").forEach((b) => b.classList.remove("is-active"));
+            btn.classList.add("is-active");
+            if (filterType === "budget") activeBudget = btn.dataset.value || "all";
+            if (filterType === "ville") activeVille = btn.dataset.value || "all";
+            applyFilters();
+          });
+        });
+      });
+    </script>
   </body>
 </html>
