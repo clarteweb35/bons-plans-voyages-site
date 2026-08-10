@@ -1,0 +1,73 @@
+---
+import { getCollection } from "astro:content";
+
+const guides = (await getCollection("guides")).sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
+);
+---
+
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Astuces &amp; Hacks Voyage — Voyage Malin</title>
+    <meta
+      name="description"
+      content="Conseils pratiques pour voyager malin : repérer les vrais bons plans, préparer son séjour, éviter les pièges classiques."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&family=Public+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/styles/global.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="/">Voyage Malin</a>
+      <span class="tagline">Départs Rennes · Nantes</span>
+      <nav class="site-nav">
+        <a href="/guides/">Astuces &amp; Hacks Voyage</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="guides-intro">
+        <p class="guides-intro__label">📚 Astuces &amp; Hacks Voyage</p>
+        <h1 class="guides-intro__title">Voyager malin, pas cher</h1>
+        <p class="guides-intro__text">
+          Des conseils pratiques pour repérer les vrais bons plans, préparer votre séjour et voyager
+          léger — sans y passer des heures.
+        </p>
+      </section>
+
+      <ul class="guides-list">
+        {
+          guides.length === 0 ? (
+            <li class="empty-state">Aucun guide publié pour le moment. Revenez bientôt.</li>
+          ) : (
+            guides.map((guide) => (
+              <li>
+                <a class="guide-card" href={`/guides/${guide.id}/`}>
+                  <div class="guide-card__media">
+                    {guide.data.image ? (
+                      <img src={guide.data.image} alt={guide.data.title} loading="lazy" />
+                    ) : (
+                      <div class="guide-card__media-fallback">✈️</div>
+                    )}
+                  </div>
+                  <div class="guide-card__body">
+                    <h2 class="guide-card__title">{guide.data.title}</h2>
+                    <p class="guide-card__description">{guide.data.description}</p>
+                    <span class="guide-card__cta">Lire le guide →</span>
+                  </div>
+                </a>
+              </li>
+            ))
+          )
+        }
+      </ul>
+    </main>
+  </body>
+</html>

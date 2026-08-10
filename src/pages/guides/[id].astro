@@ -1,0 +1,55 @@
+---
+import { getCollection, render } from "astro:content";
+
+export async function getStaticPaths() {
+  const guides = await getCollection("guides");
+  return guides.map((guide) => ({
+    params: { id: guide.id },
+    props: { guide },
+  }));
+}
+
+const { guide } = Astro.props;
+const { Content } = await render(guide);
+---
+
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{guide.data.title} — Voyage Malin</title>
+    <meta name="description" content={guide.data.description} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&family=Public+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/styles/global.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="/">Voyage Malin</a>
+      <span class="tagline">Départs Rennes · Nantes</span>
+      <nav class="site-nav">
+        <a href="/guides/">Astuces &amp; Hacks Voyage</a>
+      </nav>
+    </header>
+
+    <a class="back-link" href="/guides/">← Tous les guides</a>
+
+    <article class="guide-article">
+      {
+        guide.data.image && (
+          <div class="guide-article__media">
+            <img src={guide.data.image} alt={guide.data.title} />
+          </div>
+        )
+      }
+      <div class="guide-article__body">
+        <h1>{guide.data.title}</h1>
+        <Content />
+      </div>
+    </article>
+  </body>
+</html>

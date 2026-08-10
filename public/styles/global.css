@@ -1,0 +1,886 @@
+/* ============================================================
+   Design tokens — univers "tableau de départ gare/aéroport"
+   + "billet de voyage". Palette à l'écart du cream+serif+
+   terracotta par défaut.
+   ============================================================ */
+
+:root {
+  --ink: #16233f;
+  --paper: #f5eedd;
+  --paper-raised: #fffaf0;
+  --sun: #f2a73b;
+  --sun-deep: #b9720b;   /* version foncée du jaune, utilisable en texte sur fond clair (contraste) */
+  --teal: #1f8a82;
+  --coral: #e85c4a;
+  --line: rgba(22, 35, 63, 0.18);
+  --line-soft: rgba(22, 35, 63, 0.09);
+
+  --font-display: "Bricolage Grotesque", system-ui, sans-serif;
+  --font-body: "Public Sans", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+
+  --radius: 14px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 17px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+a {
+  color: var(--teal);
+}
+
+a:focus-visible,
+button:focus-visible {
+  outline: 3px solid var(--sun);
+  outline-offset: 2px;
+}
+
+/* ------------------------------------------------------------
+   En-tête du site
+   ------------------------------------------------------------ */
+.site-header {
+  background: var(--ink);
+  color: var(--paper);
+  padding: 1.1rem 1.5rem;
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  border-bottom: 4px solid var(--sun);
+  flex-wrap: wrap;
+}
+
+.site-header .brand {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.4rem;
+  letter-spacing: -0.01em;
+  color: var(--paper);
+  text-decoration: none;
+}
+
+.site-header .tagline {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--sun);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.site-nav {
+  margin-left: auto;
+  display: flex;
+  gap: 1.2rem;
+}
+
+.site-nav a {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--paper);
+  opacity: 0.85;
+  text-decoration: none;
+}
+
+.site-nav a:hover {
+  opacity: 1;
+  color: var(--sun);
+}
+
+/* ------------------------------------------------------------
+   Tableau des départs
+   ------------------------------------------------------------ */
+.departure-board {
+  background: var(--ink);
+  color: var(--paper);
+  border-radius: var(--radius);
+  padding: 1.6rem 1.2rem;
+  margin: 1.6rem auto;
+  max-width: 1100px;
+  box-shadow: 0 12px 30px -14px rgba(22, 35, 63, 0.5);
+}
+
+.departure-board__label {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--sun);
+  margin: 0 0 0.9rem 0.2rem;
+}
+
+.departure-row {
+  display: grid;
+  grid-template-columns: 3.2rem 1fr auto auto;
+  gap: 0.9rem;
+  align-items: center;
+  padding: 0.55rem 0.3rem;
+  border-bottom: 1px dashed rgba(245, 238, 221, 0.18);
+  font-family: var(--font-mono);
+}
+
+.departure-row:last-child {
+  border-bottom: none;
+}
+
+.departure-row__from {
+  font-size: 0.72rem;
+  opacity: 0.65;
+}
+
+.departure-row__dest {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.departure-row__duree {
+  font-size: 0.8rem;
+  opacity: 0.75;
+}
+
+.departure-row__prix {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--sun);
+  font-size: 1.05rem;
+  white-space: nowrap;
+}
+
+.flap {
+  display: inline-block;
+}
+
+.flap.is-flipping {
+  animation: flip 0.12s ease-in-out;
+}
+
+@keyframes flip {
+  0% { opacity: 1; transform: translateY(0); }
+  45% { opacity: 0.15; transform: translateY(-3px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+/* ------------------------------------------------------------
+   Grille de cartes de bons plans — refonte visuelle
+   ------------------------------------------------------------ */
+.deals {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0.5rem 1.2rem 3.5rem;
+  list-style: none;
+}
+
+.deals li {
+  margin: 0;
+}
+
+.deals li.is-hidden {
+  display: none;
+}
+
+.deal-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--paper-raised);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius);
+  overflow: hidden;
+  text-decoration: none;
+  color: var(--ink);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.deal-card:hover,
+.deal-card:focus-visible {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 36px -18px rgba(22, 35, 63, 0.45);
+}
+
+.deal-card__media {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  background: linear-gradient(135deg, var(--ink), var(--teal));
+}
+
+.deal-card__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.deal-card__media-fallback {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.6rem;
+  color: rgba(245, 238, 221, 0.9);
+  text-align: center;
+  padding: 1rem;
+  letter-spacing: 0.01em;
+}
+
+.deal-card__badges {
+  position: absolute;
+  top: 0.7rem;
+  left: 0.7rem;
+  right: 0.7rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.5rem;
+  pointer-events: none;
+}
+
+.badge {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 0.32rem 0.6rem;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.badge--eleve { background: var(--teal); color: #fff; }
+.badge--moyen { background: var(--sun); color: var(--ink); }
+.badge--faible { background: rgba(245, 238, 221, 0.92); color: var(--ink); }
+.badge--reduction { background: var(--coral); color: #fff; }
+
+.deal-card__body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: 1.1rem 1.2rem 1.3rem;
+}
+
+.deal-card__meta-top {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--teal);
+  margin-bottom: 0.35rem;
+}
+
+.deal-card__title {
+  font-family: var(--font-display);
+  font-size: 1.18rem;
+  font-weight: 700;
+  line-height: 1.28;
+  margin: 0 0 0.6rem;
+  color: var(--ink);
+}
+
+.deal-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.9rem;
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  color: rgba(22, 35, 63, 0.6);
+  margin-bottom: 0.9rem;
+}
+
+.deal-card__price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.55rem;
+  margin: auto 0 0.9rem;
+}
+
+.deal-card__price-old {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  text-decoration: line-through;
+  color: rgba(22, 35, 63, 0.4);
+}
+
+.deal-card__price-new {
+  font-family: var(--font-display);
+  font-size: 1.55rem;
+  font-weight: 800;
+  color: var(--sun-deep);
+}
+
+.deal-card__cta {
+  display: block;
+  text-align: center;
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.72rem;
+  border-radius: 10px;
+  transition: background 0.18s ease;
+}
+
+.deal-card:hover .deal-card__cta {
+  background: var(--teal);
+}
+
+.empty-state {
+  max-width: 900px;
+  margin: 3rem auto;
+  padding: 2rem;
+  text-align: center;
+  font-family: var(--font-mono);
+  color: rgba(22, 35, 63, 0.6);
+}
+
+/* ------------------------------------------------------------
+   Ventes flash — grosse réduction + repérage récent
+   ------------------------------------------------------------ */
+.flash-section {
+  max-width: 1100px;
+  margin: 2rem auto 0.5rem;
+  padding: 0 1.2rem;
+}
+
+.flash-section__label {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--sun-deep);
+  font-weight: 600;
+  margin: 0 0 0.9rem;
+}
+
+.flash-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1.5rem;
+  list-style: none;
+  margin: 0 0 1.2rem;
+  padding: 0;
+}
+
+.deal-card--flash {
+  border: 2px solid var(--sun);
+}
+
+.badge--flash {
+  background: var(--sun);
+  color: var(--ink);
+}
+
+/* ------------------------------------------------------------
+   Top Deals du jour — sélection resserrée, mise en avant
+   ------------------------------------------------------------ */
+.top-deals-section {
+  max-width: 1100px;
+  margin: 2.4rem auto 0.5rem;
+  padding: 0 1.2rem;
+}
+
+.top-deals-section__label {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--coral);
+  font-weight: 600;
+  margin: 0 0 0.9rem;
+}
+
+.top-deals-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+  list-style: none;
+  margin: 0 0 1.2rem;
+  padding: 0;
+}
+
+.deal-card--top {
+  border: 2px solid var(--coral);
+}
+
+.badge--top {
+  background: var(--ink);
+  color: var(--sun);
+}
+
+/* ------------------------------------------------------------
+   City-breaks — séjours courts (weekend, ≤ 4 jours)
+   ------------------------------------------------------------ */
+.city-breaks-section {
+  max-width: 1100px;
+  margin: 2.4rem auto 0.5rem;
+  padding: 0 1.2rem;
+}
+
+.city-breaks-section__label {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--teal);
+  font-weight: 600;
+  margin: 0 0 0.9rem;
+}
+
+.city-breaks-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1.5rem;
+  list-style: none;
+  margin: 0 0 1.2rem;
+  padding: 0;
+}
+
+.deal-card--city {
+  border: 2px solid var(--teal);
+}
+
+.badge--city {
+  background: var(--teal);
+  color: #fff;
+}
+
+.section-divider {
+  max-width: 1100px;
+  margin: 1.8rem auto 0;
+  padding: 0 1.2rem;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--teal);
+  font-weight: 600;
+}
+
+/* ------------------------------------------------------------
+   Filtres budget / ville de départ
+   ------------------------------------------------------------ */
+.filters {
+  max-width: 1100px;
+  margin: 1.4rem auto 0;
+  padding: 1.1rem 1.2rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.2rem 2rem;
+  background: var(--paper-raised);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius);
+}
+
+.filters__group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.filters__label {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(22, 35, 63, 0.55);
+  white-space: nowrap;
+}
+
+.filters__options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.filter-pill {
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  font-weight: 600;
+  padding: 0.4rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.filter-pill:hover {
+  border-color: var(--teal);
+}
+
+.filter-pill.is-active {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+}
+
+.filters-empty {
+  margin-top: 0;
+}
+
+/* ------------------------------------------------------------
+   Avis du Malin — encadré de transparence sur la page d'article
+   ------------------------------------------------------------ */
+.avis-malin {
+  margin: 1.4rem 0 0;
+  padding: 1.1rem 1.2rem;
+  background: rgba(31, 138, 130, 0.07);
+  border: 1px solid rgba(31, 138, 130, 0.3);
+  border-radius: 10px;
+}
+
+.avis-malin__title {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--teal);
+  margin: 0 0 0.6rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.avis-malin__row {
+  display: flex;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  margin-bottom: 0.4rem;
+  line-height: 1.4;
+}
+
+.avis-malin__row:last-child {
+  margin-bottom: 0;
+}
+
+.avis-malin__label {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: rgba(22, 35, 63, 0.5);
+  white-space: nowrap;
+  padding-top: 0.15rem;
+}
+
+/* ------------------------------------------------------------
+   Page d'article — billet complet
+   ------------------------------------------------------------ */
+.back-link {
+  display: inline-block;
+  margin: 1.4rem 1.2rem 0;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  text-decoration: none;
+  color: var(--ink);
+  opacity: 0.7;
+}
+
+.back-link:hover {
+  opacity: 1;
+}
+
+.ticket-article {
+  max-width: 720px;
+  margin: 1.4rem auto 4rem;
+  padding: 0 1.2rem;
+}
+
+.ticket-article__media {
+  aspect-ratio: 16 / 8;
+  border-radius: var(--radius) var(--radius) 0 0;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--ink), var(--teal));
+}
+
+.ticket-article__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.ticket-article__stub {
+  background: var(--ink);
+  color: var(--paper);
+  padding: 1.6rem 1.6rem 1.3rem;
+  position: relative;
+}
+
+.ticket-article__stub.no-media {
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+
+.ticket-article__confidence {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--sun);
+  display: inline-block;
+  margin-bottom: 0.5rem;
+}
+
+.ticket-article__stub h1 {
+  font-family: var(--font-display);
+  font-size: 1.7rem;
+  line-height: 1.2;
+  margin: 0;
+}
+
+.ticket-article__perforation {
+  height: 0;
+  border-bottom: 2px dashed rgba(22, 35, 63, 0.25);
+  position: relative;
+  margin: 0 1.6rem;
+}
+
+.ticket-article__perforation::before,
+.ticket-article__perforation::after {
+  content: "";
+  position: absolute;
+  top: -10px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--paper);
+}
+
+.ticket-article__perforation::before { left: -30px; }
+.ticket-article__perforation::after { right: -30px; }
+
+.ticket-article__body {
+  background: var(--paper-raised);
+  border-radius: 0 0 var(--radius) var(--radius);
+  padding: 1.8rem 1.6rem 2.2rem;
+  border: 1px solid var(--line-soft);
+  border-top: none;
+}
+
+.ticket-article__body h3 {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  margin: 1.6rem 0 0.6rem;
+  color: var(--ink);
+}
+
+.ticket-article__body h3:first-child {
+  margin-top: 0;
+}
+
+.ticket-article__body p {
+  margin: 0 0 0.9rem;
+}
+
+.ticket-article__body ul {
+  padding-left: 1.2rem;
+}
+
+.ticket-article__body li {
+  margin-bottom: 0.35rem;
+}
+
+.ticket-article__body a {
+  color: var(--teal);
+  font-weight: 600;
+}
+
+.ticket-article__body strong {
+  color: var(--ink);
+}
+
+.ticket-article__body em {
+  color: rgba(22, 35, 63, 0.6);
+  font-size: 0.9rem;
+}
+
+/* ------------------------------------------------------------
+   Guides "Astuces & Hacks Voyage"
+   ------------------------------------------------------------ */
+.guides-intro {
+  max-width: 900px;
+  margin: 2.4rem auto 1rem;
+  padding: 0 1.2rem;
+}
+
+.guides-intro__label {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--teal);
+  font-weight: 600;
+  margin: 0 0 0.6rem;
+}
+
+.guides-intro__title {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  margin: 0 0 0.6rem;
+  color: var(--ink);
+}
+
+.guides-intro__text {
+  max-width: 620px;
+  color: rgba(22, 35, 63, 0.75);
+  margin: 0;
+}
+
+.guides-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0.5rem 1.2rem 3.5rem;
+  list-style: none;
+}
+
+.guide-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--paper-raised);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius);
+  overflow: hidden;
+  text-decoration: none;
+  color: var(--ink);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.guide-card:hover,
+.guide-card:focus-visible {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 36px -18px rgba(22, 35, 63, 0.45);
+}
+
+.guide-card__media {
+  aspect-ratio: 16 / 9;
+  background: linear-gradient(135deg, var(--teal), var(--ink));
+}
+
+.guide-card__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.guide-card__media-fallback {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+}
+
+.guide-card__body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: 1.1rem 1.2rem 1.3rem;
+}
+
+.guide-card__title {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1.3;
+  margin: 0 0 0.6rem;
+}
+
+.guide-card__description {
+  font-size: 0.9rem;
+  color: rgba(22, 35, 63, 0.7);
+  margin: 0 0 1rem;
+  flex: 1;
+}
+
+.guide-card__cta {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--teal);
+}
+
+.guide-article {
+  max-width: 720px;
+  margin: 1.4rem auto 4rem;
+  padding: 0 1.2rem;
+}
+
+.guide-article__media {
+  aspect-ratio: 16 / 8;
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 1.6rem;
+  background: linear-gradient(135deg, var(--teal), var(--ink));
+}
+
+.guide-article__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.guide-article__body h1 {
+  font-family: var(--font-display);
+  font-size: 1.9rem;
+  line-height: 1.25;
+  margin: 0 0 1.4rem;
+  color: var(--ink);
+}
+
+.guide-article__body h3 {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  margin: 1.6rem 0 0.6rem;
+  color: var(--ink);
+}
+
+.guide-article__body h3:first-of-type {
+  margin-top: 0;
+}
+
+.guide-article__body p {
+  margin: 0 0 0.9rem;
+}
+
+.guide-article__body strong {
+  color: var(--ink);
+}

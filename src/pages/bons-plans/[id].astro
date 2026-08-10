@@ -11,6 +11,12 @@ export async function getStaticPaths() {
 
 const { offre } = Astro.props;
 const { Content } = await render(offre);
+
+const labelConfiance: Record<string, string> = {
+  ELEVE: "Bon plan confirmé",
+  MOYEN: "Offre repérée",
+  FAIBLE: "À vérifier avant réservation",
+};
 ---
 
 <html lang="fr">
@@ -19,12 +25,59 @@ const { Content } = await render(offre);
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{offre.data.title}</title>
     <meta name="description" content={offre.data.description} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&family=Public+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/styles/global.css" />
   </head>
   <body>
-    <a href="/">&larr; Retour aux bons plans</a>
+    <header class="site-header">
+      <a class="brand" href="/">Voyage Malin</a>
+      <span class="tagline">Départs Rennes · Nantes</span>
+    </header>
 
-    <article>
-      <Content />
+    <a class="back-link" href="/">&larr; Retour au tableau des départs</a>
+
+    <article class="ticket-article">
+      {
+        offre.data.image && (
+          <div class="ticket-article__media">
+            <img src={offre.data.image} alt={offre.data.destination ?? offre.data.title} />
+          </div>
+        )
+      }
+      <div class={`ticket-article__stub ${offre.data.image ? "" : "no-media"}`}>
+        <span class="ticket-article__confidence">
+          {labelConfiance[offre.data.confidence] ?? offre.data.confidence}
+        </span>
+        <h1>{offre.data.title}</h1>
+      </div>
+      <div class="ticket-article__perforation"></div>
+      <div class="ticket-article__body">
+        <Content />
+        {
+          (offre.data.avisPourquoi || offre.data.avisAttention) && (
+            <div class="avis-malin">
+              <p class="avis-malin__title">🧭 L'avis du Malin</p>
+              {offre.data.avisPourquoi && (
+                <div class="avis-malin__row">
+                  <span class="avis-malin__label">Pourquoi</span>
+                  <span>{offre.data.avisPourquoi}</span>
+                </div>
+              )}
+              {offre.data.avisAttention && (
+                <div class="avis-malin__row">
+                  <span class="avis-malin__label">Attention</span>
+                  <span>{offre.data.avisAttention}</span>
+                </div>
+              )}
+            </div>
+          )
+        }
+      </div>
     </article>
   </body>
 </html>
