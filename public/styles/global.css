@@ -552,6 +552,134 @@ button:focus-visible {
 }
 
 /* ------------------------------------------------------------
+   Nos partenaires — liens Awin statiques sans flux produits,
+   vrais logos sur fond blanc, cohérent avec le style deal-card
+   ------------------------------------------------------------ */
+.partners-section {
+  max-width: 1100px;
+  margin: 3rem auto 0;
+  padding: 1.6rem 1.2rem 2.5rem;
+  border-top: 1px dashed var(--line);
+}
+
+.partners-section__label {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(22, 35, 63, 0.55);
+  font-weight: 600;
+  margin: 0 0 1rem;
+}
+
+.partners-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1.2rem;
+  list-style: none;
+  margin: 0 0 1rem;
+  padding: 0;
+}
+
+.partner-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--paper-raised);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.partner-card__media {
+  position: relative;
+  aspect-ratio: 16 / 8;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.2rem;
+}
+
+.partner-card__media img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.partner-card__badge {
+  position: absolute;
+  top: 0.7rem;
+  left: 0.7rem;
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.partner-card__body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: 1rem 1.1rem 1.2rem;
+}
+
+.partner-card__title {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0 0 0.45rem;
+  color: var(--ink);
+  line-height: 1.25;
+}
+
+.partner-card__description {
+  font-size: 0.85rem;
+  color: rgba(22, 35, 63, 0.65);
+  margin: 0 0 0.8rem;
+  flex: 1;
+}
+
+.partner-card__cta {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--teal);
+  text-decoration: none;
+}
+
+.partner-card__cta:hover {
+  color: var(--sun-deep);
+}
+
+.partner-card__sousliens {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.partner-card__sousliens a {
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--teal);
+  text-decoration: none;
+}
+
+.partner-card__sousliens a:hover {
+  color: var(--sun-deep);
+  text-decoration: underline;
+}
+
+.partners-section__disclosure {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: rgba(22, 35, 63, 0.45);
+  margin: 0;
+}
+
+/* ------------------------------------------------------------
    Avis du Malin — encadré de transparence sur la page d'article
    ------------------------------------------------------------ */
 .avis-malin {

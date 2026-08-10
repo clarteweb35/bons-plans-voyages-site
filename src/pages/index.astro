@@ -73,6 +73,47 @@ const tranchesBudget = [
   { value: "200-500", label: "200 – 500€" },
   { value: "500-999999", label: "500€ +" },
 ];
+
+// Partenaires Awin sans flux produits automatisable : liens statiques,
+// écrits à la main (pas générés par le pipeline). Mis à jour manuellement
+// quand un nouveau partenariat est validé. Chaque partenaire a un logo
+// réel dans /public/images/partenaires/, affiché sur fond blanc.
+// HelloSafe a 3 produits distincts : plutôt qu'une carte par produit,
+// une seule carte avec les 3 liens listés dedans.
+const partenaires = [
+  {
+    nom: "Singapore Airlines",
+    categorie: "Vols",
+    logo: "/images/partenaires/singapore-airlines.png",
+    description: "Vols longue distance vers l'Asie et l'Océanie, avec un service reconnu pour son confort.",
+    url: "https://www.awin1.com/cread.php?awinmid=9257&awinaffid=2993527&ued=https%3A%2F%2Fwww.singaporeair.com%2Ffr_FR%2Ffr%2Fhome",
+  },
+  {
+    nom: "Bourse des Voyages",
+    categorie: "Séjours sur mesure",
+    logo: "/images/partenaires/bourse-des-voyages.png",
+    description: "Voyages sur mesure et circuits organisés, avec une expertise sur les destinations lointaines.",
+    url: "https://www.awin1.com/cread.php?awinmid=116343&awinaffid=2993527&campaign=Focus+Europe+du+Nord&ued=https%3A%2F%2Fwww.bourse-des-voyages.com%2F",
+  },
+  {
+    nom: "Safari en Afrique",
+    categorie: "Safaris",
+    logo: "/images/partenaires/safari-en-afrique.png",
+    description: "Spécialiste des safaris et voyages sur mesure en Afrique australe et de l'Est.",
+    url: "https://www.awin1.com/cread.php?awinmid=68308&awinaffid=2993527&ued=https%3A%2F%2Fsafarienafrique.fr%2F",
+  },
+  {
+    nom: "HelloSafe",
+    categorie: "Assurance",
+    logo: "/images/partenaires/hellosafe.png",
+    description: "Comparateur d'assurances voyage. Choisissez la couverture adaptée à votre séjour :",
+    sousLiens: [
+      { label: "Assurance voyage", url: "https://www.awin1.com/cread.php?awinmid=128757&awinaffid=2993527&ued=https%3A%2F%2Fhellosafe.fr%2Fassurance-voyage" },
+      { label: "Assurance annulation", url: "https://www.awin1.com/cread.php?awinmid=128757&awinaffid=2993527&ued=https%3A%2F%2Fhellosafe.fr%2Fassurance-voyage%2Fannulation" },
+      { label: "Assurance Schengen", url: "https://www.awin1.com/cread.php?awinmid=128757&awinaffid=2993527&ued=https%3A%2F%2Fhellosafe.fr%2Fassurance-voyage%2Fschengen" },
+    ],
+  },
+];
 ---
 
 <html lang="fr">
@@ -336,6 +377,42 @@ const tranchesBudget = [
           </p>
         )
       }
+
+      <section class="partners-section" aria-label="Nos partenaires">
+        <p class="partners-section__label">🤝 Nos partenaires</p>
+        <ul class="partners-grid">
+          {partenaires.map((partenaire) => (
+            <li class="partner-card">
+              <div class="partner-card__media">
+                <img src={partenaire.logo} alt={partenaire.nom} loading="lazy" />
+                <span class="badge partner-card__badge">{partenaire.categorie}</span>
+              </div>
+              <div class="partner-card__body">
+                <h2 class="partner-card__title">{partenaire.nom}</h2>
+                <p class="partner-card__description">{partenaire.description}</p>
+                {partenaire.sousLiens ? (
+                  <ul class="partner-card__sousliens">
+                    {partenaire.sousLiens.map((sl) => (
+                      <li>
+                        <a href={sl.url} target="_blank" rel="sponsored noopener">
+                          {sl.label} →
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <a class="partner-card__cta" href={partenaire.url} target="_blank" rel="sponsored noopener">
+                    Découvrir →
+                  </a>
+                )}
+              </div>
+            </li>
+          ))}
+        </ul>
+        <p class="partners-section__disclosure">
+          Liens affiliés : en cliquant, vous ne payez pas plus cher et vous soutenez le site.
+        </p>
+      </section>
     </main>
 
     <script>
