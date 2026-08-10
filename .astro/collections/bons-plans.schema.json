@@ -1,1 +1,66 @@
-
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "confidence": {
+      "type": "string",
+      "enum": [
+        "ELEVE",
+        "MOYEN",
+        "FAIBLE"
+      ]
+    },
+    "destination": {
+      "type": "string"
+    },
+    "voyagiste": {
+      "type": "string"
+    },
+    "prix": {
+      "type": "number"
+    },
+    "prixInitial": {
+      "type": "number"
+    },
+    "reduction": {
+      "type": "number"
+    },
+    "duree": {
+      "type": "number"
+    },
+    "villeDepart": {
+      "type": "string"
+    },
+    "image": {
+      "type": "string"
+    },
+    "lien": {
+      "type": "string"
+    },
+    "avisPourquoi": {
+      "type": "string"
+    },
+    "avisAttention": {
+      "type": "string"
+    },
+    "$schema": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "title",
+    "description",
+    "date",
+    "confidence"
+  ]
+}
